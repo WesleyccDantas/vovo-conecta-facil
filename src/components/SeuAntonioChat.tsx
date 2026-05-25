@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircleHeart, X, Send } from "lucide-react";
+import { MessageCircleHeart, X, Send, Volume2 } from "lucide-react";
 import antonio from "@/assets/seu-antonio.png";
 
 type Msg = { from: "antonio" | "me"; text: string };
@@ -65,25 +65,56 @@ export function SeuAntonioChat() {
   const [msgs, setMsgs] = useState<Msg[]>(initial);
   const [text, setText] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs, open]);
+
+  // ESC fecha o chat + foco gerenciado
+  useEffect(() => {
+    if (!open) {
+      try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
+      openerRef.current?.focus();
+      return;
+    }
+    closeBtnRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const speak = (value: string) => {
+    if (!("speechSynthesis" in window)) return;
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(value);
+    u.lang = "pt-BR";
+    u.rate = 0.85;
+    synth.speak(u);
+  };
 
   const ask = (question: string) => {
     if (!question.trim()) return;
     setMsgs((m) => [...m, { from: "me", text: question }]);
     setText("");
     setTimeout(() => {
-      setMsgs((m) => [...m, { from: "antonio", text: reply(question) }]);
+      const answer = reply(question);
+      setMsgs((m) => [...m, { from: "antonio", text: answer }]);
     }, 600);
   };
 
   return (
     <>
       <button
+        ref={openerRef}
         onClick={() => setOpen(true)}
-        aria-label="Abrir conversa com Seu Antônio"
+        aria-label="Abrir conversa com Seu Antônio, seu assistente"
+        aria-haspopup="dialog"
+        aria-expanded={open}
         className="fixed bottom-6 right-6 z-40 flex items-center gap-3 bg-primary text-primary-foreground rounded-full pl-3 pr-5 py-3 shadow-soft hover:scale-105 active:scale-95 transition-transform"
       >
         <span className="h-12 w-12 rounded-full bg-card overflow-hidden ring-4 ring-primary-foreground/30">
@@ -113,15 +144,16 @@ export function SeuAntonioChat() {
                 <p className="text-sm opacity-90">Aqui pra te ajudar 💬</p>
               </div>
               <button
+                ref={closeBtnRef}
                 onClick={() => setOpen(false)}
-                aria-label="Fechar conversa"
+                aria-label="Fechar conversa (atalho: tecla Esc)"
                 className="h-11 w-11 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 flex items-center justify-center"
               >
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6" aria-hidden />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-warm/30">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-warm/30" aria-live="polite" aria-atomic="false">
               {msgs.map((m, i) => (
                 <div
                   key={i}
@@ -131,7 +163,17 @@ export function SeuAntonioChat() {
                       : "ml-auto bg-primary text-primary-foreground rounded-br-sm"
                   }`}
                 >
-                  {m.text}
+                  <p>{m.text}</p>
+                  {m.from === "antonio" && (
+                    <button
+                      type="button"
+                      onClick={() => speak(m.text)}
+                      aria-label="Ouvir esta resposta do Seu Antônio em voz alta"
+                      className="mt-2 inline-flex items-center gap-2 bg-warm hover:bg-accent hover:text-accent-foreground rounded-xl px-3 py-2 text-base font-bold border-2 border-primary text-primary"
+                    >
+                      <Volume2 className="h-5 w-5" aria-hidden /> 🔊 Ouvir
+                    </button>
+                  )}
                 </div>
               ))}
               {msgs.length <= 1 && (
