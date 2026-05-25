@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Send, Quote, X, Check } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
+import { SpeakButton } from "@/components/SpeakButton";
 
 export const Route = createFileRoute("/historias")({
   component: Historias,
@@ -82,23 +83,33 @@ function Historias() {
     setTimeout(() => setSent(false), 200);
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
     <PageShell>
       <section className="mx-auto max-w-5xl px-4 py-10">
         <h1 className="font-display text-4xl sm:text-5xl font-bold mb-2">Histórias de Superação</h1>
-        <p className="text-lg text-muted-foreground mb-8">
+        <p className="text-lg text-muted-foreground mb-6">
           Olha só quem já passou por onde você está passando. Você não está sozinho(a).
         </p>
 
         <div className="grid md:grid-cols-3 gap-6">
           {stories.map((s, i) => (
             <article key={`${s.name}-${i}`} className={`${s.bg} rounded-3xl p-7 shadow-card flex flex-col gap-4 animate-fade-in`}>
-              <div className="h-20 w-20 rounded-full bg-card grid place-items-center text-5xl shadow-soft">
+              <div className="h-20 w-20 rounded-full bg-card grid place-items-center text-5xl shadow-soft" aria-hidden>
                 {s.avatar}
               </div>
               <Quote className="h-8 w-8 text-primary" aria-hidden />
               <p className="text-xl leading-relaxed">{s.text}</p>
               <p className="font-display text-xl font-bold mt-auto">{s.name}</p>
+              <SpeakButton text={`${s.name}. ${s.text}`} label="Ouvir história" className="self-start" />
             </article>
           ))}
         </div>

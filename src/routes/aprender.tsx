@@ -20,6 +20,7 @@ import {
   Heart,
 } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
+import { SpeakButton } from "@/components/SpeakButton";
 
 export const Route = createFileRoute("/aprender")({
   component: Aprender,
@@ -176,7 +177,7 @@ function Aprender() {
 
           <h1 className="font-display text-4xl font-bold mb-3">{current.title}</h1>
 
-          <div className="bg-warm/60 rounded-3xl p-5 mb-8 flex gap-4 items-start border-2 border-warm">
+          <div className="bg-warm/60 rounded-3xl p-5 mb-4 flex gap-4 items-start border-2 border-warm">
             <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground grid place-items-center shrink-0">
               <Heart className="h-6 w-6" aria-hidden />
             </div>
@@ -184,6 +185,18 @@ function Aprender() {
               <span className="font-bold">Seu Antônio: </span>
               {current.intro}
             </p>
+          </div>
+
+          <div className="mb-8">
+            <SpeakButton
+              label="Ouvir este tutorial"
+              text={() =>
+                `${current.title}. ${current.intro} ` +
+                current.steps
+                  .map((s, i) => `Passo ${i + 1}: ${s.title}. ${s.desc}${s.tip ? " Dica: " + s.tip : ""}`)
+                  .join(" ")
+              }
+            />
           </div>
 
           <ol className="space-y-5">

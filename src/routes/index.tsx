@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookOpen, Brain, Heart, Users, ArrowRight } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
+import { SpeakButton } from "@/components/SpeakButton";
 import antonio from "@/assets/seu-antonio.png";
 
 export const Route = createFileRoute("/")({
@@ -60,13 +61,20 @@ function Home() {
             Aqui no Conecta Vovô você aprende a usar o celular com calma, no seu ritmo. Sem
             pressa, sem palavra difícil — como um vizinho ajudando.
           </p>
-          <Link
-            to="/aprender"
-            className="inline-flex items-center gap-3 bg-primary text-primary-foreground rounded-2xl px-8 h-16 font-bold text-xl shadow-soft hover:scale-[1.02] active:scale-95 transition-transform"
-          >
-            Começar a aprender
-            <ArrowRight className="h-6 w-6" aria-hidden />
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/aprender"
+              className="inline-flex items-center gap-3 bg-primary text-primary-foreground rounded-2xl px-8 h-16 font-bold text-xl shadow-soft hover:scale-[1.02] active:scale-95 transition-transform"
+            >
+              Começar a aprender
+              <ArrowRight className="h-6 w-6" aria-hidden />
+            </Link>
+            <SpeakButton
+              label="Ouvir boas-vindas"
+              text="Bem-vindo ao Conecta Vovô. Aqui você aprende a usar o celular com calma, no seu ritmo. Sem pressa, sem palavra difícil, como um vizinho ajudando. Toque em Começar a aprender para ver os tutoriais."
+              className="h-16"
+            />
+          </div>
         </div>
         <div className="relative">
           <div className="absolute inset-0 bg-warm rounded-[2.5rem] rotate-3" aria-hidden />
