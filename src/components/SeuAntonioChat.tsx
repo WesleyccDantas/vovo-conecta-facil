@@ -14,9 +14,9 @@ const initial: Msg[] = [
 
 const suggestions = [
   "O que é Wi-Fi?",
-  "Como faço uma ligação?",
-  "O que é golpe?",
-  "Como aumentar a letra?",
+  "Como fazer uma ligação?",
+  "O que é um golpe?",
+  "Como aumentar a letra do celular?",
 ];
 
 function normalize(s: string) {
@@ -176,15 +176,15 @@ export function SeuAntonioChat() {
                   )}
                 </div>
               ))}
-              {msgs.length <= 1 && (
-                <div className="pt-2">
-                  <p className="text-sm font-bold text-muted-foreground mb-2">Pode tocar numa dessas:</p>
-                  <div className="flex flex-wrap gap-2">
+              {msgs.length > 0 && msgs[msgs.length - 1].from === "antonio" && (
+                <div className="pt-4 animate-fade-in">
+                  <p className="text-lg font-bold text-primary mb-3">Posso ajudar em mais alguma coisa? Escolha uma opção abaixo. 💛</p>
+                  <div className="flex flex-wrap gap-3">
                     {suggestions.map((s) => (
                       <button
                         key={s}
                         onClick={() => ask(s)}
-                        className="bg-card border-2 border-border hover:border-primary rounded-2xl px-4 py-2 text-base font-bold"
+                        className="bg-card border-2 border-border hover:border-primary hover:bg-warm rounded-2xl px-5 py-3 text-lg font-bold shadow-soft"
                       >
                         {s}
                       </button>

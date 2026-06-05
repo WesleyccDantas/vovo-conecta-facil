@@ -1,41 +1,75 @@
 import { useMemo, useState } from "react";
 import { RotateCcw, Trophy, Check } from "lucide-react";
 
-// Simple word search: a grid with words placed horizontally.
-// User taps letters to select a word; if it matches one of the target words, it's found.
+// Banco de palavras familiares e acessíveis para idosos
+const WORD_BANK = [
+  "CASA", "AMIGO", "NETO", "FAMILIA", "JARDIM",
+  "FLORES", "CAFE", "LIVRO", "PRAIA", "MUSICA",
+  "SAUDE", "PASSEIO", "IGREJA", "ALEGRIA", "VIAGEM",
+  "CARINHO", "SOL", "CHUVA", "GATO", "CACHORRO",
+];
 
-const WORDS = ["AMOR", "NETO", "CAFE", "SOL", "LAR"];
 const SIZE = 8;
+
+function pickWords(count: number): string[] {
+  const pool = [...WORD_BANK];
+  const result: string[] = [];
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const idx = Math.floor(Math.random() * pool.length);
+    result.push(pool[idx]);
+    pool.splice(idx, 1);
+  }
+  return result;
+}
 
 type Cell = { letter: string; row: number; col: number };
 
-function makeGrid(): { grid: Cell[][]; placements: Record<string, Cell[]> } {
+function makeGrid(words: string[]): { grid: Cell[][]; placements: Record<string, Cell[]> } {
   const grid: Cell[][] = Array.from({ length: SIZE }, (_, r) =>
     Array.from({ length: SIZE }, (_, c) => ({ letter: "", row: r, col: c })),
   );
   const placements: Record<string, Cell[]> = {};
-  const usedRows = new Set<number>();
 
-  for (const word of WORDS) {
-    let placed = false;
-    for (let attempt = 0; attempt < 50 && !placed; attempt++) {
-      const row = Math.floor(Math.random() * SIZE);
-      if (usedRows.has(row)) continue;
+  for (const word of words) {
+    const candidates: { row: number; start: number }[] = [];
+    for (let r = 0; r < SIZE; r++) {
       const maxStart = SIZE - word.length;
       if (maxStart < 0) continue;
-      const start = Math.floor(Math.random() * (maxStart + 1));
-      const cells: Cell[] = [];
-      for (let i = 0; i < word.length; i++) {
-        cells.push(grid[row][start + i]);
+      for (let s = 0; s <= maxStart; s++) {
+        candidates.push({ row: r, start: s });
       }
-      cells.forEach((cell, i) => (cell.letter = word[i]));
-      placements[word] = cells;
-      usedRows.add(row);
-      placed = true;
+    }
+    // Embaralhar candidatos
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+
+    let placed = false;
+    for (const { row, start } of candidates) {
+      const cells: Cell[] = [];
+      let overlapOk = true;
+      for (let i = 0; i < word.length; i++) {
+        const cell = grid[row][start + i];
+        if (cell.letter && cell.letter !== word[i]) {
+          overlapOk = false;
+          break;
+        }
+        cells.push(cell);
+      }
+      if (overlapOk) {
+        cells.forEach((cell, i) => (cell.letter = word[i]));
+        placements[word] = cells;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      console.warn(`Não foi possível colocar a palavra: ${word}`);
     }
   }
 
-  // Fill empty cells
+  // Preencher células vazias
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   for (const row of grid) {
     for (const cell of row) {
@@ -46,13 +80,16 @@ function makeGrid(): { grid: Cell[][]; placements: Record<string, Cell[]> } {
 }
 
 export function WordSearch({ onExit }: { onExit: () => void }) {
-  const [{ grid, placements }, setBoard] = useState(() => makeGrid());
+  const [gameWords, setGameWords] = useState<string[]>(() => pickWords(5));
+  const [{ grid, placements }, setBoard] = useState(() => makeGrid(gameWords));
   const [selected, setSelected] = useState<Cell[]>([]);
   const [found, setFound] = useState<Set<string>>(new Set());
-  const allFound = found.size === WORDS.length;
+  const allFound = found.size === gameWords.length;
 
   const reset = () => {
-    setBoard(makeGrid());
+    const nextWords = pickWords(5);
+    setGameWords(nextWords);
+    setBoard(makeGrid(nextWords));
     setSelected([]);
     setFound(new Set());
   };
@@ -64,11 +101,10 @@ export function WordSearch({ onExit }: { onExit: () => void }) {
       const next = exists
         ? prev.filter((c) => !(c.row === cell.row && c.col === cell.col))
         : [...prev, cell];
-      // sort by column for matching
       const sorted = [...next].sort((a, b) => a.col - b.col);
       const word = sorted.map((c) => c.letter).join("");
       const sameRow = sorted.every((c) => c.row === sorted[0]?.row);
-      if (sameRow && WORDS.includes(word) && !found.has(word)) {
+      if (sameRow && gameWords.includes(word) && !found.has(word)) {
         setFound((f) => new Set(f).add(word));
         return [];
       }
@@ -78,6 +114,7 @@ export function WordSearch({ onExit }: { onExit: () => void }) {
 
   const isSelected = (cell: Cell) =>
     selected.some((c) => c.row === cell.row && c.col === cell.col);
+
   const isFound = useMemo(() => {
     const cells = new Set<string>();
     for (const word of found) {
@@ -92,7 +129,7 @@ export function WordSearch({ onExit }: { onExit: () => void }) {
         <h2 className="font-display text-3xl font-bold">Caça-Palavras</h2>
         <div className="flex items-center gap-3">
           <span className="bg-warm rounded-2xl px-4 py-2 text-lg font-bold">
-            {found.size} / {WORDS.length}
+            {found.size} / {gameWords.length}
           </span>
           <button
             onClick={onExit}
@@ -111,8 +148,11 @@ export function WordSearch({ onExit }: { onExit: () => void }) {
         <div className="bg-success/15 border-2 border-success/30 rounded-3xl p-8 text-center animate-fade-in">
           <Trophy className="h-16 w-16 text-success mx-auto mb-3" aria-hidden />
           <p className="font-display text-3xl font-bold mb-2">Você achou todas! 🎉</p>
-          <p className="text-lg text-muted-foreground mb-6">
-            Que orgulho! Sua atenção tá em dia.
+          <p className="text-lg text-muted-foreground mb-2">
+            Que orgulho! Você encontrou {found.size} palavras.
+          </p>
+          <p className="text-base text-muted-foreground mb-6">
+            Uma nova rodada com palavras diferentes vai começar agora.
           </p>
           <button
             onClick={reset}
@@ -148,7 +188,7 @@ export function WordSearch({ onExit }: { onExit: () => void }) {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {WORDS.map((w) => (
+            {gameWords.map((w) => (
               <span
                 key={w}
                 className={`inline-flex items-center gap-2 rounded-2xl px-4 h-12 font-bold text-lg border-2 ${
