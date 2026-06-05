@@ -14,9 +14,9 @@ const initial: Msg[] = [
 
 const suggestions = [
   "O que é Wi-Fi?",
-  "Como faço uma ligação?",
-  "O que é golpe?",
-  "Como aumentar a letra?",
+  "Como fazer uma ligação?",
+  "O que é um golpe?",
+  "Como aumentar a letra do celular?",
 ];
 
 function normalize(s: string) {
