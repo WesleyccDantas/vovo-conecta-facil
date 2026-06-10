@@ -62,9 +62,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Conecta Vovô ensina idosos a usar o celular de um jeito simples, seguro e acolhedor. Aprenda WhatsApp, chamadas de vídeo, jogos e mais.",
       },
-      { property: "og:title", content: "Conecta Vovô" },
-      { property: "og:description", content: "Inclusão digital acolhedora para idosos." },
+      { property: "og:title", content: "Conecta Vovô — Inclusão digital com carinho" },
+      { property: "og:description", content: "Conecta Vovô is a web app for digital inclusion, teaching seniors smartphone use simply and safely." },
       { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "Conecta Vovô — Inclusão digital com carinho" },
+      { name: "description", content: "Conecta Vovô is a web app for digital inclusion, teaching seniors smartphone use simply and safely." },
+      { name: "twitter:description", content: "Conecta Vovô is a web app for digital inclusion, teaching seniors smartphone use simply and safely." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/60ab4116-198d-4f34-98ec-59bd3207ee01/id-preview-8200e859--4ce9fd21-ce8f-438b-a5ee-6afb051bad56.lovable.app-1780670159953.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/60ab4116-198d-4f34-98ec-59bd3207ee01/id-preview-8200e859--4ce9fd21-ce8f-438b-a5ee-6afb051bad56.lovable.app-1780670159953.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
